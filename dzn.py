@@ -63,8 +63,13 @@ async def scrobbler(ctx, artista=None, musica=None, total_scrobbles: int=None):
             contador += 1
             await asyncio.sleep(0.5)
         except pylast.WSError as e:
-            await ctx.reply(f'Erro ao scrobble: {str(e)}')
+            if "Rate Limit Exceeded" in str(e):
+                await ctx.reply(f'Erro ao scrobble: Limite de scrobbles diários atingido (3000 scrobbles por dia), Daqui 24h eu volto')
+                await asyncio.sleep(86400) 
+            else:
+                await ctx.reply(f'Erro ao scrobble: {str(e)}')
     
-    await ctx.reply(f'Scrobble concluído! Total de {total_scrobbles} scrobbles para {user.mention}. Perfil Last.fm: {perfil_lastfm}')
+    await ctx.reply(f'Scrobble concluído! Total de {contador} scrobbles para {user.mention}. Perfil Last.fm: {perfil_lastfm}')
 
 bot.run(config["TOKEN"])
+
