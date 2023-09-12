@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import pylast
 import time
-
+import asyncio 
 config = {
     "prefixo": "-", 
     "TOKEN": "YOUR_TOKEN_HERE",
@@ -39,15 +39,15 @@ async def scrobbler(ctx, artista=None, musica=None, total_scrobbles: int=None):
         await ctx.reply('O número total de scrobbles deve ser maior ou igual a 1.')
         return
 
-    if total_scrobbles > 3000:
-        await ctx.reply('O número total de scrobbles solicitados excede o limite máximo permitido pelo Last.fm, que é de 3000 scrobbles por dia.')
-        return
-
     user = ctx.author
     perfil_lastfm = f'[{config["login"]}](https://www.last.fm/user/{config["login"]})'
 
-    # Isso é uma estimativa aproximada e pode não ser 100% preciso.
-    num_scrobbles_hoje = network.get_user(user_name=config["login"]).get_playcount()
+    hoje = time.strftime("%Y-%m-%d")
+    user_info = network.get_user(config["login"])
+    
+    scrobbles_hoje = user_info.get_recent_tracks(time_from=int(time.mktime(time.strptime(hoje, "%Y-%m-%d"))))
+
+    num_scrobbles_hoje = len(scrobbles_hoje)
     
     if num_scrobbles_hoje + total_scrobbles > 3000:
         await ctx.reply(f'O número total de scrobbles solicitados, somado ao número de scrobbles já feitos hoje ({num_scrobbles_hoje}), excede o limite máximo permitido pelo Last.fm, que é de 3000 scrobbles por dia.')
@@ -61,6 +61,7 @@ async def scrobbler(ctx, artista=None, musica=None, total_scrobbles: int=None):
         try:
             network.scrobble(artist=artista, title=musica, timestamp=int(time.time()))
             contador += 1
+            await asyncio.sleep(0.5)
         except pylast.WSError as e:
             await ctx.reply(f'Erro ao scrobble: {str(e)}')
     
