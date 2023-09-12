@@ -35,12 +35,23 @@ async def scrobbler(ctx, artista=None, musica=None, total_scrobbles: int=None):
         await ctx.reply('evita dog')
         return
 
-    if total_scrobbles < 1 or total_scrobbles > 3000:
-        await ctx.reply('O número total de scrobbles deve estar entre 1 e 3000 (máximo diário).')
+    if total_scrobbles < 1:
+        await ctx.reply('O número total de scrobbles deve ser maior ou igual a 1.')
+        return
+
+    if total_scrobbles > 3000:
+        await ctx.reply('O número total de scrobbles solicitados excede o limite máximo permitido pelo Last.fm, que é de 3000 scrobbles por dia.')
         return
 
     user = ctx.author
     perfil_lastfm = f'[{config["login"]}](https://www.last.fm/user/{config["login"]})'
+
+    # Isso é uma estimativa aproximada e pode não ser 100% preciso.
+    num_scrobbles_hoje = network.get_user(user_name=config["login"]).get_playcount()
+    
+    if num_scrobbles_hoje + total_scrobbles > 3000:
+        await ctx.reply(f'O número total de scrobbles solicitados, somado ao número de scrobbles já feitos hoje ({num_scrobbles_hoje}), excede o limite máximo permitido pelo Last.fm, que é de 3000 scrobbles por dia.')
+        return
 
     await ctx.reply(f'Iniciando o scrobble de {total_scrobbles} scrobbles de "{musica}" por "{artista}" para {user.mention}.')
     
@@ -52,7 +63,7 @@ async def scrobbler(ctx, artista=None, musica=None, total_scrobbles: int=None):
             contador += 1
         except pylast.WSError as e:
             await ctx.reply(f'Erro ao scrobble: {str(e)}')
-
-    await ctx.reply(f'Scrobble concluído! Total de {total_scrobbles} scrobbles para {user.mention}. Perfil Last.fm: {perfil_lastfm}')
     
+    await ctx.reply(f'Scrobble concluído! Total de {total_scrobbles} scrobbles para {user.mention}. Perfil Last.fm: {perfil_lastfm}')
+
 bot.run(config["TOKEN"])
