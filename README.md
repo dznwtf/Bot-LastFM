@@ -95,4 +95,10 @@ config = {
 1. Execute o arquivo `instalar.bat` para instalar as dependências necessárias. Você pode fazer isso clicando duas vezes no arquivo ou usando o prompt de comando:
 
 ```
+```markdown
 
+2. Após a conclusão da instalação, execute o arquivo `start.bat` para iniciar o bot:
+
+```
+
+Qualquer dúvidas: https://discord.gg/cassian
